@@ -36,13 +36,36 @@ var server = http.createServer(
 
 		// Won't be always called, will be called only when payload is there
 		request.on('data', function(data) {
-				buffer += decoder.write(data);
+			buffer += decoder.write(data);
 		});
 
 		// Always will be called, irrespective of whether payload is there or not
 		request.on('end',function(){
-				buffer += decoder.end();
-				response.end("Hello from Node Server :" + buffer + " \n");
+			buffer += decoder.end();
+
+			//Chosing the handler
+			var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound
+			var data = {
+				'trimmedPath' : trimmedPath,
+				'queryStringPath' : queryString,
+				'method' : method,
+				'headers' : headers,
+				'payload' : buffer
+			};
+
+			chosenHandler(data, function(statusCode,payload) { 
+				// Use default statusCodes and payload in case of erraneous ones
+
+				statusCode = typeof(statusCode) === 'number' ? statusCode : 250 ;
+				payload = typeof(payload) === 'object' ? payload : {} ;
+				payload = JSON.stringify(payload); // Converting Object to String
+
+				response.writeHead(statusCode);
+				response.end(payload);
+				console.log("Returning Response: ", statusCode, payload);
+			});
+
+			response.end("Hello from Node Server :" + buffer + " \n");
 		// @TODO find out why when buffer is printed outside gives empty value.
 		});
 
@@ -54,3 +77,18 @@ server.listen(3000,
 	function() { 
 		console.log('Server listening to port 3000! Awesome !!! ');
 	});
+
+var handlers = {};
+
+handlers.sample = function(data, callback) {
+	callback(200,{'name': 'sample handler'});
+};
+
+handlers.notFound = function(data, callback) {
+	callback(404);
+};
+
+// Creating a router
+var router = {
+	'sample': handlers.sample
+};
