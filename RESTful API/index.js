@@ -9,39 +9,44 @@
 //Dependencies
 var http = require('http');
 var url = require('url');
+var StringDecoder = require('string_decoder').StringDecoder;
 
 // Creating a server object
 var server = http.createServer(
 	function(request, response){
 
-		// Parse the URL and send response and log the request path
-		var parsedURL = url.parse(request.url, true); //true parses only queryString
+		// @TODO Parse the URL and send response and log the request
+
+		var parsedURL = url.parse(request.url, true); //true -> parses only queryString
+
 		// Converts request URL to a json format of required values
 		var path = parsedURL.pathname;
 		var trimmedPath = path.replace(/^\/+|\/+$/g,'');
 
-		// Get the type of the HTTP Method
 		var method = request.method;
+		var headers = request.headers;
 
 		// Get the query String as an Object
 		var queryString = parsedURL.query;
 
-		// Get the request headers
-		var headers = request.headers;
+		// Get the payload, if any
+		// Payload here means body content in POST ( in GET we can't send data through BODY)
+		var decoder = new StringDecoder('utf-8');
+		var buffer = "";
 
-		// Result for DEV Purpose
-		var result = "";
-		result += " method : " + method + "\n";
-		result += " path : " + path + "\n";
-		result += " parsedURL :" + JSON.stringify(parsedURL) + "\n";
-		result += " headers :" + JSON.stringify(headers) + "\n";
+		// Won't be always called, will be called only when payload is there
+		request.on('data', function(data) {
+				buffer += decoder.write(data);
+		});
 
-		response.end("Hello from Node Server \n" + result + " \n");
+		// Always will be called, irrespective of whether payload is there or not
+		request.on('end',function(){
+				buffer += decoder.end();
+				response.end("Hello from Node Server :" + buffer + " \n");
+		// @TODO find out why when buffer is printed outside gives empty value.
+		});
 
-		console.log("Request received on path: " + trimmedPath +
-					"With " + method + " method" +
-					"With :" +  JSON.stringify(queryString) + " Query Strings"
-			);
+		
 	});
 
 // Making the server listen to port 3000
@@ -49,5 +54,3 @@ server.listen(3000,
 	function() { 
 		console.log('Server listening to port 3000! Awesome !!! ');
 	});
-
-
