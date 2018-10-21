@@ -15,20 +15,33 @@ var server = http.createServer(
 	function(request, response){
 
 		// Parse the URL and send response and log the request path
-		var parsedURL = url.parse(request.url, true); //true returns the query string
+		var parsedURL = url.parse(request.url, true); //true parses only queryString
 		// Converts request URL to a json format of required values
 		var path = parsedURL.pathname;
 		var trimmedPath = path.replace(/^\/+|\/+$/g,'');
-		// var y = request.url;
-		// console.log(x);
-		// console.log(y);
 
-		// var result = "";
-		// result += JSON.stringify(x);
-		// result += JSON.stringify(y);
-		response.end("Hello from Node Server \n");
+		// Get the type of the HTTP Method
+		var method = request.method;
 
-		console.log("Request received on path: " + trimmedPath);
+		// Get the query String as an Object
+		var queryString = parsedURL.query;
+
+		// Get the request headers
+		var headers = request.headers;
+
+		// Result for DEV Purpose
+		var result = "";
+		result += " method : " + method + "\n";
+		result += " path : " + path + "\n";
+		result += " parsedURL :" + JSON.stringify(parsedURL) + "\n";
+		result += " headers :" + JSON.stringify(headers) + "\n";
+
+		response.end("Hello from Node Server \n" + result + " \n");
+
+		console.log("Request received on path: " + trimmedPath +
+					"With " + method + " method" +
+					"With :" +  JSON.stringify(queryString) + " Query Strings"
+			);
 	});
 
 // Making the server listen to port 3000
