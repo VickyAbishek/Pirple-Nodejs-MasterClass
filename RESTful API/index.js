@@ -1,6 +1,7 @@
 /*
  *Author: Vicky Abishek
  *Date: 21/10/2018
+
 */
 
 
@@ -10,6 +11,7 @@
 var http = require('http');
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
+var config = require('./config.js')
 
 // Creating a server object
 var server = http.createServer(
@@ -45,7 +47,7 @@ var server = http.createServer(
 
 			//Chosing the handler
 			var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound
-			var data = {
+			var data = {	
 				'trimmedPath' : trimmedPath,
 				'queryStringPath' : queryString,
 				'method' : method,
@@ -60,8 +62,9 @@ var server = http.createServer(
 				payload = typeof(payload) === 'object' ? payload : {} ;
 				payload = JSON.stringify(payload); // Converting Object to String
 
+				response.setHeader('Content-Type','application/json');
 				response.writeHead(statusCode);
-				response.end(payload);
+	 		   	response.end(payload);
 				console.log("Returning Response: ", statusCode, payload);
 			});
 
@@ -72,10 +75,10 @@ var server = http.createServer(
 		
 	});
 
-// Making the server listen to port 3000
-server.listen(3000, 
+// Making the server listen to a particular port
+server.listen(config.port, 
 	function() { 
-		console.log('Server listening to port 3000! Awesome !!! ');
+		console.log('Server listening to port ' + config.port +'! Mode: ' + config.envName);
 	});
 
 var handlers = {};
