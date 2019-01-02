@@ -11,15 +11,43 @@
 var http = require('http');
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
-var config = require('./config.js')
+var config = require('./config')
 
 // Creating a server object
 var server = http.createServer(
 	function(request, response){
+		customServer(request, response);
+});
+
+// Making the server listen to a particular port
+server.listen(config.httpPort, 
+	function() { 
+		console.log(config);
+		console.log('Server listening to port ' + config.httpPort +'! Mode: ' + config.envName);
+	});
+
+var handlers = {};
+
+handlers.sample = function(data, callback) {
+	callback(200,{'name': 'sample handler'});
+};
+
+handlers.notFound = function(data, callback) {
+	callback(404);
+};
+
+// Creating a router
+var router = {
+	'sample': handlers.sample
+};
+
+
+var customServer = function(request, response) {
 
 		// @TODO Parse the URL and send response and log the request
 
 		var parsedURL = url.parse(request.url, true); //true -> parses only queryString
+		console.log(parsedURL);
 
 		// Converts request URL to a json format of required values
 		var path = parsedURL.pathname;
@@ -30,6 +58,7 @@ var server = http.createServer(
 
 		// Get the query String as an Object
 		var queryString = parsedURL.query;
+		console.log(queryString);
 
 		// Get the payload, if any
 		// Payload here means body content in POST ( in GET we can't send data through BODY)
@@ -71,27 +100,4 @@ var server = http.createServer(
 			response.end("Hello from Node Server :" + buffer + " \n");
 		// @TODO find out why when buffer is printed outside gives empty value.
 		});
-
-		
-	});
-
-// Making the server listen to a particular port
-server.listen(config.port, 
-	function() { 
-		console.log('Server listening to port ' + config.port +'! Mode: ' + config.envName);
-	});
-
-var handlers = {};
-
-handlers.sample = function(data, callback) {
-	callback(200,{'name': 'sample handler'});
-};
-
-handlers.notFound = function(data, callback) {
-	callback(404);
-};
-
-// Creating a router
-var router = {
-	'sample': handlers.sample
 };
