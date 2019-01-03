@@ -3,8 +3,8 @@
  var environments = {};
 
  environments.staging = {
- 	'httpPort' : 3000,
- 	'httpsPort': 3001,
+ 	'httpPort' : 3001,
+ 	'httpsPort': 3002,
  	'envName' : 'staging'
  };
 

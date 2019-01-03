@@ -9,22 +9,33 @@
 
 //Dependencies
 var http = require('http');
+var https = require('https');
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
 var config = require('./config')
+var fs = require('fs')
 
 // Creating a server object
-var server = http.createServer(
+var httpServer = http.createServer(
 	function(request, response){
 		customServer(request, response);
 });
 
 // Making the server listen to a particular port
-server.listen(config.httpPort, 
+httpServer.listen(config.httpPort, 
 	function() { 
 		console.log(config);
 		console.log('Server listening to port ' + config.httpPort +'! Mode: ' + config.envName);
 	});
+
+var httpsServerOptions = {
+	'key': fs.readFileSync('./https/key.pem'),
+	'cert': fs.readFileSync('./https/cert.pem')
+}
+
+var httpsServer = https.createServer(httpsServerOptions, function(req,res) {
+	customServer(req,res);
+})
 
 var handlers = {};
 
